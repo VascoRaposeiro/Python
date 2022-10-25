@@ -1,0 +1,63 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 18 11:43:12 2022
+
+@author: vasco
+"""
+
+import numpy as np
+import scipy.signal as sg
+import math
+import matplotlib.pyplot as plt
+
+wc = 756*2*np.pi
+ws = 7000*2*np.pi
+fs = 20000
+
+
+
+def myfreqz(b,a):
+    w,h = sg.freqz(b,a)
+    h_db = 20 * np.log10 (abs(h))
+    #print(h_db)
+    cutOffIndex=next((i for i, db in enumerate(h_db.tolist()) if db < -3), None) # retorna index do valor mais peroto de -3 db
+    if(cutOffIndex is None):
+         print('ERRO')
+    else:
+        pontoX=(w/max(w))
+        print("Frequencia de corte obtida:")
+        print((wc*pontoX[cutOffIndex])/(wc*(2*np.pi)/(fs)))
+     
+   
+
+    plt.subplot(211)
+    plt.plot(w/max(w), h_db)
+    plt.ylim(-60, 5)
+    plt.ylabel('Magnitude (db)')
+    plt.title('Frequency response')
+    plt.grid()
+    ##plt.xlim(0,4)
+    plt.subplot(212)
+    h_Phase = np.unwrap(np.arctan2(np.imag(h),np.real(h)))
+    plt.plot(w/max(w), h_Phase)
+    plt.ylabel('Phase (radians)')
+    plt.xlabel(r'Normalized Frequency (x$\pi$rad/sample)')
+    plt.title(r'Phase response')
+    plt.subplots_adjust(hspace=0.5)
+
+
+
+w1=wc/fs     #normalização
+w2=ws/fs
+print("Frequencia de corte planeada:")
+print(wc/(2*np.pi))
+#print(w2)
+window = "hann"
+M=8*np.pi/((w2-w1))
+M1=math.ceil(M)
+if M1%2==0:   #se número é par, para impar é ==1
+    M1=M1+1
+a1=sg.firwin(M1, cutoff=w1, window = window)
+myfreqz(a1,1)
+print("M:")
+print(M1)
