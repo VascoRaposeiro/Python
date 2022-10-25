@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Oct 23 23:25:29 2022
+
+@author: vasco
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as sg
+
+
+    #fre corte angular
+N=3
+fs=20000
+Ts=1/fs
+
+    
+num=[0.31768,2*0.31768,0.31768]
+den=[1,-0.36953,0.19582]
+
+plt.subplot(211)
+w, h = sg.freqz(num, den)  #dá o valor da função de transferência numa gama de freq (w)
+ampl=20*np.log10(abs(h))              #passa valores amplitude para dB
+f=w*fs/(2*np.pi)                         #passa valores para Hz
+plt.semilogx(f, ampl)
+plt.ylabel('Amplitude [dB]')
+plt.xlabel('Frequency [Hz]')
+
+
+cutOffIndex=next((i for i, db in enumerate(ampl.tolist()) if db < 0.72), None) # retorna index do valor mais perto de 0.72 db
+if(cutOffIndex is None):
+        print('ERRO')
+else:
+        print("Frequencia de corte=")
+        print(f[cutOffIndex])
+        plt.text(float(f'{f[cutOffIndex]:.3f}'), float(f'{ampl[cutOffIndex]:.3f}'), '({}, {})'.format(float(f'{f[cutOffIndex]:.3f}'), float(f'{ampl[cutOffIndex]:.3f}')))
+        plt.plot(f[cutOffIndex], ampl[cutOffIndex], 'r*')
+
+plt.ylim(min(ampl),max(ampl)+30)
+plt.xlim(min(f),max(f)+100000)
+plt.yticks(np.arange(-100, 1, 20)) 
+plt.grid(linestyle='dotted')      #grelha gráfico
+plt.subplot(212)
+h_Phase = np.unwrap(np.arctan2(np.imag(h),np.real(h)))*180/np.pi
+#print(h_Phase)
+plt.semilogx(w*fs/(2*np.pi),h_Phase)
+plt.ylabel('Phase [Degree]')
+plt.xlabel(r'Frequency [Hz]')
+plt.title(r'Phase response')
+plt.subplots_adjust(hspace=1)
+plt.figure()
+
